@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>8-Cell Brainfuck Interpreter</title>
+    <style>
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #1a1a1a; 
+            color: #ccc; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: auto; 
+        }
+        h2 { color: #00ff41; }
+        textarea { 
+            width: 100%; 
+            height: 200px; 
+            background: #2a2a2a; 
+            color: #00ff41; 
+            border: 1px solid #444; 
+            padding: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+        button { 
+            background: #00ff41; 
+            color: #000; 
+            border: none; 
+            padding: 10px 20px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px;
+        }
+        button:hover { background: #00cc33; }
+        #output-container {
+            margin-top: 20px;
+            border-top: 1px solid #444;
+            padding-top: 10px;
+        }
+        #output { 
+            color: #fff; 
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>8-Cell BF Interpreter</h2>
+    <p>Memory size: 8 cells (wrapping enabled)</p>
+    
+    <textarea id="code" placeholder="Enter your BF code here...">
+++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.</textarea>
+    
+    <button onclick="runBF()">RUN CODE</button>
+
+    <div id="output-container">
+        <strong>Output:</strong>
+        <div id="output"></div>
+    </div>
+
+    <script src="interpreter.js"></script>
+</body>
+</html>
