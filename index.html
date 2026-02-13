@@ -2,30 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>8-Cell BF Terminal</title>
+    <title>8-Cell BF Interpreter</title>
     <style>
-        body { font-family: monospace; background: #121212; color: #00ff41; padding: 20px; max-width: 900px; margin: auto; }
-        textarea { width: 100%; height: 180px; background: #1e1e1e; color: #00ff41; border: 1px solid #333; padding: 10px; font-size: 1.1em; resize: vertical; }
-        input { width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; margin: 10px 0; box-sizing: border-box; }
-        button { background: #00ff41; color: #000; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; }
+        body { font-family: 'Courier New', monospace; background: #121212; color: #00ff41; padding: 20px; max-width: 800px; margin: auto; }
+        h2 { border-bottom: 1px solid #333; padding-bottom: 10px; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; color: #888; }
+        textarea { width: 100%; height: 150px; background: #1a1a1a; color: #00ff41; border: 1px solid #333; padding: 10px; font-size: 1.1em; outline: none; }
+        input { width: 100%; padding: 10px; background: #1a1a1a; color: #fff; border: 1px solid #333; box-sizing: border-box; outline: none; }
+        button { background: #00ff41; color: #000; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; }
         button:hover { background: #00cc33; }
-        #output { margin-top: 20px; padding: 15px; background: #000; border: 1px solid #333; min-height: 40px; white-space: pre-wrap; color: #fff; }
+        #output-area { margin-top: 25px; background: #000; border: 1px solid #333; padding: 15px; min-height: 60px; }
+        #output { white-space: pre-wrap; word-wrap: break-word; color: #fff; }
+        .error { color: #ff4444; }
     </style>
 </head>
 <body>
 
     <h2>8-CELL INTERPRETER</h2>
     
-    <label>Program:</label>
-    <textarea id="code" placeholder="Enter BF code...">++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.</textarea>
+    <label>Program (Brainfuck):</label>
+    <textarea id="code" placeholder="Enter code here...">++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.</textarea>
     
     <label>Input Buffer (for , command):</label>
-    <input type="text" id="inputBuffer" placeholder="Characters for the ',' command go here...">
+    <input type="text" id="inputBuffer" placeholder="Type input here...">
     
-    <button onclick="runBF()">EXECUTE</button>
+    <button onclick="runBF()">EXECUTE PROGRAM</button>
 
-    <h3>Output:</h3>
-    <div id="output"></div>
+    <div id="output-area">
+        <strong>Output:</strong><br>
+        <div id="output"></div>
+    </div>
 
     <script>
     function runBF() {
@@ -33,25 +39,50 @@
         const outBox = document.getElementById('output');
         let inputArr = document.getElementById('inputBuffer').value.split('').map(c => c.charCodeAt(0));
         
-        outBox.innerText = '';
-        
+        outBox.innerText = 'Running...';
+        outBox.className = '';
+
         const MEM_SIZE = 8;
         const memory = new Uint8Array(MEM_SIZE);
-        let ptr = 0, pc = 0, output = "";
+        let ptr = 0;
+        let pc = 0;
+        let output = "";
+        
+        // Safety switch to prevent browser freezing
+        let iterations = 0;
+        const MAX_ITERATIONS = 500000; 
 
-        // Jump Mapping
-        const stack = [], jumps = {};
+        // 1. Pre-map Jumps (Loops)
+        const stack = [];
+        const jumps = {};
         for (let i = 0; i < code.length; i++) {
             if (code[i] === '[') stack.push(i);
             else if (code[i] === ']') {
+                if (stack.length === 0) {
+                    outBox.innerText = "Syntax Error: Unmatched ']'";
+                    outBox.className = 'error';
+                    return;
+                }
                 let start = stack.pop();
                 jumps[start] = i;
                 jumps[i] = start;
             }
         }
+        if (stack.length > 0) {
+            outBox.innerText = "Syntax Error: Unmatched '['";
+            outBox.className = 'error';
+            return;
+        }
 
-        // Execution
+        // 2. Execute
         while (pc < code.length) {
+            iterations++;
+            if (iterations > MAX_ITERATIONS) {
+                outBox.innerText = "Error: Infinite loop detected (Exceeded 500,000 steps).";
+                outBox.className = 'error';
+                return;
+            }
+
             switch (code[pc]) {
                 case '>': ptr = (ptr + 1) % MEM_SIZE; break;
                 case '<': ptr = (ptr - 1 + MEM_SIZE) % MEM_SIZE; break;
@@ -64,7 +95,8 @@
             }
             pc++;
         }
-        outBox.innerText = output || "Process finished with no output.";
+
+        outBox.innerText = output || "[Program finished with no output]";
     }
     </script>
 </body>
